@@ -1,0 +1,91 @@
+/* ==========================================================================
+   Grow More — design tokens.  Brand: warm gold on graphite (from the app icon).
+   Semantic colours are fixed everywhere:  income = green · expense = coral · transfer = blue.
+   ========================================================================== */
+@font-face {
+  font-family: 'Manrope';
+  src: url('../assets/fonts/manrope-latin-wght.woff2') format('woff2');
+  font-weight: 200 800;
+  font-style: normal;
+  font-display: swap;
+}
+
+:root {
+  --font: 'Manrope', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+
+  --r-xs: 8px; --r-sm: 12px; --r: 16px; --r-lg: 22px; --r-xl: 28px;
+  --s1: 4px; --s2: 8px; --s3: 12px; --s4: 16px; --s5: 20px; --s6: 24px; --s7: 32px; --s8: 40px;
+  --ease: cubic-bezier(.22, .8, .24, 1);
+  --sidebar-w: 264px;
+  --nav-h: 64px;
+  --safe-t: env(safe-area-inset-top, 0px);
+  --safe-b: env(safe-area-inset-bottom, 0px);
+  --blur: 22px;
+  --income: var(--pos);
+  --expense: var(--neg);
+  --transfer: var(--info);
+}
+
+/* ---------- Dark (default) ---------- */
+:root, [data-theme='dark'] {
+  color-scheme: dark;
+  --bg: #0A0B0E;
+  --surface-solid: #15171C;
+  --glass: rgba(255, 255, 255, .055);
+  --glass-2: rgba(255, 255, 255, .085);
+  --glass-3: rgba(255, 255, 255, .13);
+  --stroke: rgba(255, 255, 255, .09);
+  --stroke-2: rgba(255, 255, 255, .17);
+  --hi: rgba(255, 255, 255, .075);
+  --text: #F5F2EB;
+  --text-2: #D0CBC0;
+  --muted: #9D988E;
+  --faint: #716D65;
+  --gold: #E8B04A;
+  --gold-hi: #F6D083;
+  --gold-ink: #1B1406;
+  --gold-soft: rgba(232, 176, 74, .15);
+  --accent-text: #EDB955;
+  --pos: #52DDA0;  --pos-soft: rgba(82, 221, 160, .14);
+  --neg: #FF8585;  --neg-soft: rgba(255, 133, 133, .14);
+  --info: #86B7FF; --info-soft: rgba(134, 183, 255, .15);
+  --warn: #F5B94A; --warn-soft: rgba(245, 185, 74, .16);
+  --shadow: 0 14px 34px rgba(0, 0, 0, .38), 0 2px 8px rgba(0, 0, 0, .28);
+  --shadow-sm: 0 6px 16px rgba(0, 0, 0, .28);
+  --glow-1: rgba(232, 176, 74, .11);
+  --glow-2: rgba(110, 140, 255, .075);
+  --chart-grid: rgba(255, 255, 255, .06);
+  --overlay: rgba(4, 5, 7, .6);
+}
+
+/* ---------- Light ---------- */
+[data-theme='light'] {
+  color-scheme: light;
+  --bg: #F2EFE8;
+  --surface-solid: #FFFFFF;
+  --glass: rgba(255, 255, 255, .64);
+  --glass-2: rgba(255, 255, 255, .82);
+  --glass-3: rgba(255, 255, 255, .96);
+  --stroke: rgba(40, 30, 10, .09);
+  --stroke-2: rgba(40, 30, 10, .17);
+  --hi: rgba(255, 255, 255, .95);
+  --text: #1C1913;
+  --text-2: #3F3A31;
+  --muted: #6A645A;
+  --faint: #948D80;
+  --gold: #E5A834;
+  --gold-hi: #F2C25F;
+  --gold-ink: #1B1406;
+  --gold-soft: rgba(229, 168, 52, .18);
+  --accent-text: #8A5604;
+  --pos: #0C8A58;  --pos-soft: rgba(12, 138, 88, .12);
+  --neg: #C93442;  --neg-soft: rgba(201, 52, 66, .11);
+  --info: #2A66CB; --info-soft: rgba(42, 102, 203, .11);
+  --warn: #9A6205; --warn-soft: rgba(229, 168, 52, .2);
+  --shadow: 0 14px 32px rgba(70, 50, 10, .11), 0 2px 6px rgba(70, 50, 10, .07);
+  --shadow-sm: 0 6px 14px rgba(70, 50, 10, .08);
+  --glow-1: rgba(232, 176, 74, .24);
+  --glow-2: rgba(120, 150, 255, .15);
+  --chart-grid: rgba(40, 30, 10, .08);
+  --overlay: rgba(40, 32, 14, .32);
+}

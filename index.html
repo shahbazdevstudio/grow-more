@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#0A0B0E">
+  <meta name="color-scheme" content="dark light">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Grow More">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Grow More</title>
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" type="image/png" href="assets/icons/icon-192.png">
+  <link rel="apple-touch-icon" href="assets/icons/icon-192.png">
+  <link rel="preload" href="assets/fonts/manrope-latin-wght.woff2" as="font" type="font/woff2" crossorigin>
+  <script src="js/theme-boot.js"></script>
+  <link rel="stylesheet" href="css/tokens.css">
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/layout.css">
+  <link rel="stylesheet" href="css/screens.css">
+</head>
+<body>
+  <!-- Branded loading screen -->
+  <div class="splash" id="splash" role="status" aria-label="Loading Grow More">
+    <div class="splash-inner">
+      <div class="splash-mark"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 17l6-7 4 4 8-9"/><path d="M15 5h6v6"/></svg></div>
+      <div class="splash-name">Grow More</div>
+      <div class="splash-tag">Your money, in one place</div>
+      <div class="splash-bar"><i></i></div>
+    </div>
+  </div>
+
+  <!-- PIN lock -->
+  <section class="lock" id="lock" aria-label="Unlock Grow More" hidden></section>
+
+  <!-- App shell -->
+  <div class="app" id="app" hidden>
+    <aside class="sidebar" aria-label="Main navigation">
+      <div class="side-brand"><span class="logomark"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 17l6-7 4 4 8-9"/><path d="M15 5h6v6"/></svg></span>Grow More</div>
+      <nav class="side-nav" id="side-nav"></nav>
+      <div class="side-foot">
+        <a class="nav-item" href="#/settings" data-route="settings"><svg class="i" aria-hidden="true"><use href="assets/icons/sprite.svg#settings"></use></svg><span>Settings</span></a>
+        <button class="nav-item" type="button" data-lock-btn><svg class="i" aria-hidden="true"><use href="assets/icons/sprite.svg#lock"></use></svg><span>Lock</span></button>
+      </div>
+    </aside>
+    <div class="main">
+      <header class="topbar">
+        <div class="brand-m only-mobile"><span class="logomark"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 17l6-7 4 4 8-9"/><path d="M15 5h6v6"/></svg></span></div>
+        <div><h1 id="page-title">Dashboard</h1><div class="top-sub" id="page-sub"></div></div>
+        <div class="top-actions">
+          <button class="btn btn-primary only-desktop flex" id="btn-add" type="button"><svg class="i" aria-hidden="true"><use href="assets/icons/sprite.svg#plus"></use></svg>Add transaction</button>
+          <button class="icon-btn" id="btn-theme" type="button" aria-label="Toggle light or dark theme"></button>
+          <button class="icon-btn only-mobile" type="button" data-lock-btn aria-label="Lock app"><svg class="i" aria-hidden="true"><use href="assets/icons/sprite.svg#lock"></use></svg></button>
+        </div>
+      </header>
+      <main id="view" tabindex="-1"></main>
+    </div>
+    <nav class="tabbar" id="tabbar" aria-label="Main navigation"></nav>
+  </div>
+
+  <div class="toasts" id="toasts" aria-live="polite"></div>
+  <div id="modal-root"></div>
+
+  <noscript><p style="padding:24px;color:#ccc;font-family:sans-serif">Grow More needs JavaScript to run.</p></noscript>
+  <script src="config.js"></script>
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>
