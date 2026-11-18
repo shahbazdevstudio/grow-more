@@ -7,6 +7,16 @@
 /* Top bar */
 .topbar { position: sticky; top: 0; z-index: 30; display: flex; align-items: center; gap: 12px; padding: calc(12px + var(--safe-t)) 16px 10px; transition: background .25s, box-shadow .25s; }
 .topbar.is-stuck { background: color-mix(in srgb, var(--bg) 70%, transparent); -webkit-backdrop-filter: blur(22px) saturate(170%); backdrop-filter: blur(22px) saturate(170%); box-shadow: 0 1px 0 var(--stroke); }
+/* Mobile: full-width, dark blurred header (edge to edge, no side gaps) */
+@media (max-width: 1023.98px) {
+  .topbar { top: 0; margin: 0 0 6px; padding: calc(12px + var(--safe-t)) 16px 12px; border-radius: 0;
+    background: rgba(10, 11, 14, .72); border-bottom: 1px solid var(--stroke);
+    -webkit-backdrop-filter: blur(20px) saturate(160%); backdrop-filter: blur(20px) saturate(160%);
+    box-shadow: 0 8px 24px -14px rgba(0,0,0,.6); }
+  .topbar.is-stuck { background: rgba(10, 11, 14, .86); }
+  [data-theme='light'] .topbar { background: rgba(255, 255, 255, .78); }
+  [data-theme='light'] .topbar.is-stuck { background: rgba(255, 255, 255, .9); }
+}
 .topbar .brand-m { display: flex; align-items: center; gap: 10px; }
 .topbar h1 { font-size: 22px; letter-spacing: -.03em; }
 .top-sub { font-size: 12.5px; color: var(--muted); font-weight: 600; }

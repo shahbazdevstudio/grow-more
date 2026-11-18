@@ -147,25 +147,21 @@ export const ACCOUNT_PRESETS = [
   { name: 'Savings', type: 'savings', logoKey: '' },
 ];
 
-function resizeToDataUri(file, size = 256) {
-  return new Promise((resolve, reject) => {
-    if (!/^image\/(png|jpe?g|webp|gif|svg\+xml)$/.test(file.type)) return reject(new Error('Choose a PNG, JPEG, WebP or SVG image.'));
-    const url = URL.createObjectURL(file);
-    const img = new Image();
-    img.onload = () => {
-      const c = document.createElement('canvas'); c.width = c.height = size;
-      const ctx = c.getContext('2d');
-      ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, size, size);
-      const r = Math.min(size / img.width, size / img.height) * 0.8;
-      ctx.drawImage(img, (size - img.width * r) / 2, (size - img.height * r) / 2, img.width * r, img.height * r);
-      URL.revokeObjectURL(url);
-      let out = c.toDataURL('image/webp', 0.88);
-      if (!out.startsWith('data:image/webp')) out = c.toDataURL('image/jpeg', 0.88);
-      out.length > 400000 ? reject(new Error('That image is too detailed. Try a simpler one.')) : resolve(out);
-    };
-    img.onerror = () => { URL.revokeObjectURL(url); reject(new Error('That image could not be read.')); };
-    img.src = url;
-  });
+async function resizeToDataUri(file, size = 256) {
+  if (!/^image\/(png|jpe?g|webp|gif|svg\+xml)$/.test(file.type)) throw new Error('Choose a PNG, JPEG, WebP or SVG image.');
+  // Read as a data: URL - the page CSP (img-src) blocks blob: URLs, which made every upload fail with "could not be read".
+  const src = await new Promise((resolve, reject) => { const fr = new FileReader(); fr.onload = () => resolve(String(fr.result)); fr.onerror = () => reject(new Error('That image could not be read.')); fr.readAsDataURL(file); });
+  const img = await new Promise((resolve, reject) => { const i = new Image(); i.onload = () => resolve(i); i.onerror = () => reject(new Error('That image could not be read.')); i.src = src; });
+  const w = img.naturalWidth || img.width || size; const h = img.naturalHeight || img.height || size; // SVGs without a size
+  const c = document.createElement('canvas'); c.width = c.height = size;
+  const ctx = c.getContext('2d');
+  ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, size, size);
+  const r = Math.min(size / w, size / h) * 0.8;
+  ctx.drawImage(img, (size - w * r) / 2, (size - h * r) / 2, w * r, h * r);
+  let out = c.toDataURL('image/webp', 0.88);
+  if (!out.startsWith('data:image/webp')) out = c.toDataURL('image/jpeg', 0.88);
+  if (out.length > 400000) throw new Error('That image is too detailed. Try a simpler one.');
+  return out;
 }
 
 export function openAccountForm({ account = null, preset = null, onSaved } = {}) {

@@ -1,6 +1,6 @@
 const cfg = window.GROW_MORE_CONFIG || {};
-// API_URL "" (set by the Vercel build) = same origin: the API lives at /api on this domain. Local dev: http://localhost:5000.
-const apiUrl = typeof cfg.API_URL === 'string' ? cfg.API_URL : 'http://localhost:5000';
+// API_URL "" (set by the build) = same origin: /api on this domain is proxied to the backend (no CORS involved).
+const apiUrl = typeof cfg.API_URL === 'string' ? cfg.API_URL : '';
 export const API_BASE = `${apiUrl.replace(/\/+$/, '')}/api`;
 
 export class ApiErr extends Error {
