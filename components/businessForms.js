@@ -97,23 +97,18 @@ export function openReceiveForm({ title, amount, path, label = 'Received in', on
 }
 
 /* ================================ DARAZ ================================ */
-function readAsDataUrl(file) {
+function squareThumb(file, size = 480) {
   return new Promise((resolve, reject) => {
-    const fr = new FileReader();
-    fr.onload = () => resolve(String(fr.result));
-    fr.onerror = () => reject(new Error('That image could not be read.'));
-    fr.readAsDataURL(file);
+    if (!/^image\/(png|jpe?g|webp)$/.test(file.type)) return reject(new Error('Choose a PNG, JPEG or WebP photo.'));
+    const url = URL.createObjectURL(file); const img = new Image();
+    img.onload = () => {
+      const c = document.createElement('canvas'); c.width = c.height = size; const ctx = c.getContext('2d');
+      const s = Math.min(img.width, img.height); ctx.drawImage(img, (img.width - s) / 2, (img.height - s) / 2, s, s, 0, 0, size, size); URL.revokeObjectURL(url);
+      let out = c.toDataURL('image/webp', 0.8); if (!out.startsWith('data:image/webp')) out = c.toDataURL('image/jpeg', 0.8);
+      out.length > 400000 ? reject(new Error('That photo is too detailed. Try another one.')) : resolve(out);
+    };
+    img.onerror = () => { URL.revokeObjectURL(url); reject(new Error('That image could not be read.')); }; img.src = url;
   });
-}
-async function squareThumb(file, size = 480) {
-  if (!/^image\/(png|jpe?g|webp)$/.test(file.type)) throw new Error('Choose a PNG, JPEG or WebP photo.');
-  const src = await readAsDataUrl(file); // a data: URL (the page CSP blocks blob: images)
-  const img = await new Promise((resolve, reject) => { const i = new Image(); i.onload = () => resolve(i); i.onerror = () => reject(new Error('That image could not be read.')); i.src = src; });
-  const c = document.createElement('canvas'); c.width = c.height = size; const ctx = c.getContext('2d');
-  const s = Math.min(img.width, img.height); ctx.drawImage(img, (img.width - s) / 2, (img.height - s) / 2, s, s, 0, 0, size, size);
-  let out = c.toDataURL('image/webp', 0.8); if (!out.startsWith('data:image/webp')) out = c.toDataURL('image/jpeg', 0.8);
-  if (out.length > 400000) throw new Error('That photo is too detailed. Try another one.');
-  return out;
 }
 export const thumb = (p, cls = '') => (p.image ? html`<span class="thumb ${cls}"><img src="${p.image}" alt="" loading="lazy" decoding="async"></span>` : html`<span class="thumb ${cls} ph">${icon('package')}</span>`);
 

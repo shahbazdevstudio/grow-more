@@ -7,14 +7,6 @@
 /* Top bar */
 .topbar { position: sticky; top: 0; z-index: 30; display: flex; align-items: center; gap: 12px; padding: calc(12px + var(--safe-t)) 16px 10px; transition: background .25s, box-shadow .25s; }
 .topbar.is-stuck { background: color-mix(in srgb, var(--bg) 70%, transparent); -webkit-backdrop-filter: blur(22px) saturate(170%); backdrop-filter: blur(22px) saturate(170%); box-shadow: 0 1px 0 var(--stroke); }
-/* Mobile: the header floats as a glass pill, 20px from the top and the sides */
-@media (max-width: 1023.98px) {
-  .topbar { top: calc(20px + var(--safe-t)); margin: calc(20px + var(--safe-t)) 20px 6px; padding: 10px 14px; border-radius: 22px;
-    background: color-mix(in srgb, var(--surface-solid) 58%, transparent); border: 1px solid var(--stroke-2);
-    -webkit-backdrop-filter: blur(24px) saturate(180%); backdrop-filter: blur(24px) saturate(180%);
-    box-shadow: 0 10px 30px -12px rgba(0,0,0,.5), inset 0 1px 0 var(--hi); }
-  .topbar.is-stuck { background: color-mix(in srgb, var(--surface-solid) 72%, transparent); box-shadow: 0 14px 34px -12px rgba(0,0,0,.6), inset 0 1px 0 var(--hi); }
-}
 .topbar .brand-m { display: flex; align-items: center; gap: 10px; }
 .topbar h1 { font-size: 22px; letter-spacing: -.03em; }
 .top-sub { font-size: 12.5px; color: var(--muted); font-weight: 600; }

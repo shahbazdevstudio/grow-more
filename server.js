@@ -31,7 +31,7 @@ app.get('/assets/logos/index.json', (req, res) => {
   res.set('Cache-Control', 'no-cache').json(files);
 });
 
-const BLOCK = /^\/(server\.js|package(-lock)?\.json|\.env.*|tools|node_modules|README\.md)/i;
+const BLOCK = /^\/(server\.js|vercel\.json|scripts|package(-lock)?\.json|\.env.*|tools|node_modules|README\.md)/i;
 app.use((req, res, next) => (BLOCK.test(req.path) ? res.status(404).end() : next()));
 app.use(express.static(ROOT, {
   index: 'index.html', dotfiles: 'deny',

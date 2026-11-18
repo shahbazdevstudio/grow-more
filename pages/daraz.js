@@ -142,7 +142,7 @@ export default async function daraz(el, { params, refresh }) {
   const esrch = debounce((v) => { ef.q = v.trim(); expList.load(); }, 300);
   const onSaved = refresh;
   const off = [
-    delegate(el, 'click', '[data-tab]', (e, b) => { tab = b.dataset.tab; window.history.replaceState(null, '', `#/daraz?tab=${tab}`); show(); }),
+    delegate(el, 'click', '[data-tab]', (e, b) => { tab = b.dataset.tab; history.replaceState(null, '', `#/daraz?tab=${tab}`); show(); }),
     delegate(el, 'click', '[data-r]', async (e, b) => { range = mem.range = b.dataset.r; await loadSummary(); overview(); }),
     delegate(el, 'click', '[data-move]', (e, b) => openMovementForm({ type: b.dataset.move, onSaved })),
     delegate(el, 'click', '[data-sell]', (e, b) => { e.stopPropagation(); openMovementForm({ type: 'sale', productId: b.dataset.sell, onSaved }); }),
@@ -151,7 +151,7 @@ export default async function daraz(el, { params, refresh }) {
     delegate(el, 'click', '[data-prod]', (e, c) => { if (!e.target.closest('button')) openDetail(c.dataset.prod); }),
     delegate(el, 'keydown', '[data-prod]', (e, c) => { if (e.key === 'Enter') openDetail(c.dataset.prod); }),
     delegate(el, 'click', '[data-restoreprod]', async (e, b) => { try { await api.post(`/daraz/products/${b.dataset.restoreprod}/restore`); toast('Product restored'); refresh(); } catch (er) { toast(er.message, { type: 'error' }); } }),
-    delegate(el, 'click', '[data-pending]', () => { hf.payout = 'pending'; tab = 'history'; window.history.replaceState(null, '', '#/daraz?tab=history'); show(); }),
+    delegate(el, 'click', '[data-pending]', () => { hf.payout = 'pending'; tab = 'history'; history.replaceState(null, '', '#/daraz?tab=history'); show(); }),
     delegate(el, 'input', '[data-psearch]', (e, i) => psrch(i.value)),
     delegate(el, 'change', '[data-hprod]', (e, s) => { hf.product = s.value; histList.load(); }),
     delegate(el, 'click', '[data-ht]', (e, b) => { hf.type = b.dataset.ht; hf.payout = ''; $$('[data-ht]', el).forEach((x) => x.setAttribute('aria-pressed', x === b)); $('[data-hpay]', el).setAttribute('aria-pressed', 'false'); histList.load(); }),

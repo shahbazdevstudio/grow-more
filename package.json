@@ -2,13 +2,13 @@
   "name": "grow-more-frontend",
   "version": "1.0.0",
   "private": true,
-  "description": "Grow More web client (vanilla HTML/CSS/JS). Local: tiny static server. Vercel: static files from public/.",
+  "description": "Grow More web client (vanilla HTML/CSS/JS) + tiny static server",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js",
     "dev": "node --watch server.js",
-    "build:icons": "node tools/build-icons.mjs",
-    "build": "node build.js"
+    "start": "node server.js",
+    "build": "node scripts/build.js",
+    "build:icons": "node tools/build-icons.mjs"
   },
   "engines": {
     "node": ">=20"
