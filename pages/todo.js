@@ -1,12 +1,14 @@
 import { $, $$, html, icon, mount, delegate } from '../js/core/dom.js';
 import { api } from '../js/core/api.js';
-import { todayStr, dateShort } from '../js/core/format.js';
+import { todayStr, dateShort, addDays } from '../js/core/format.js';
 import { emptyState } from '../components/emptyState.js';
 import { openModal, confirmDialog, withLoading } from '../components/modal.js';
 import { errorBox, readForm } from '../components/forms.js';
 import { toast } from '../components/toast.js';
 
-const mem = { status: 'pending' };
+const mem = { status: 'pending', when: 'all' };
+const WHEN = [['all', 'All dates'], ['today', 'Today'], ['tomorrow', 'Tomorrow'], ['old', 'Old']];
+const EMPTY_WHEN = { today: 'Nothing is due today.', tomorrow: 'Nothing is due tomorrow.', old: 'No old tasks. You are all caught up.' };
 
 export function openTodoForm({ todo = null, onSaved } = {}) {
   const m = openModal({ title: todo ? 'Edit task' : 'New task', size: 'narrow', mobile: 'sheet', body: html`<form id="tdf" novalidate autocomplete="off"><div class="stack"><div data-err></div>
@@ -32,17 +34,18 @@ export async function deleteTodo(t, onDone) {
 }
 
 export default async function todo(el, { refresh }) {
-  let items = []; let counts = { pending: 0, completed: 0, overdue: 0, dueToday: 0 }; let today = todayStr(); let seq = 0; let pag = null; const byId = new Map();
+  let items = []; let counts = { pending: 0, completed: 0, overdue: 0, dueToday: 0 }; let whenCounts = { all: 0, today: 0, tomorrow: 0, old: 0 }; let today = todayStr(); let seq = 0; let pag = null; const byId = new Map();
   mount(el, html`<div class="page-head"><p>Keep the day simple. Add a task, tick it off.</p><div class="page-actions"><button class="btn btn-primary" type="button" data-new>${icon('plus')} Add task</button></div></div>
     <form class="todo-quick" data-quick autocomplete="off"><input class="input" name="title" maxlength="140" placeholder="Quick add — type a task and press Enter" aria-label="Quick add task"><button class="btn" type="submit">${icon('plus', 'i-sm')} Add</button></form>
-    <div class="tabs" data-tabs></div><div data-list></div>`);
+    <div class="tabs" data-tabs></div><div class="chips todo-when" data-when role="group" aria-label="Filter by date"></div><div data-list></div>`);
   const drawTabs = () => mount($('[data-tabs]', el), html`<div class="seg" role="tablist">${[['pending', 'Pending', counts.pending], ['completed', 'Completed', counts.completed], ['all', 'All', counts.pending + counts.completed]].map(([k, l, n]) => html`<button type="button" data-s="${k}" aria-pressed="${mem.status === k}">${l} <span class="muted xs">${n}</span></button>`)}</div>${counts.overdue ? html`<span class="pill expense" style="align-self:center;margin-left:12px">${counts.overdue} overdue</span>` : ''}`);
   const row = (t) => html`<div class="todo ${t.completed ? 'done' : ''}" data-id="${t.id}"><button class="check" type="button" data-check="${t.id}" aria-pressed="${t.completed}" aria-label="${t.completed ? 'Mark as not done' : 'Mark as done'}: ${t.title}">${icon('check', 'i-sm')}</button>
     <div class="row-main" data-edit="${t.id}" style="cursor:pointer"><div class="todo-title">${t.title}</div>${t.description ? html`<div class="todo-desc">${t.description}</div>` : ''}${t.dueDate ? html`<div style="margin-top:6px"><span class="pill ${t.overdue ? 'expense' : t.dueToday ? 'gold' : ''}">${icon('calendar', 'i-sm')} ${t.dueToday ? 'Today' : dateShort(t.dueDate)}${t.overdue ? ' · overdue' : ''}</span></div>` : ''}</div>
     <div class="todo-actions"><button class="icon-btn sm plain" type="button" data-edit="${t.id}" aria-label="Edit task">${icon('pencil', 'i-sm')}</button><button class="icon-btn sm plain danger" type="button" data-del="${t.id}" aria-label="Delete task">${icon('trash-2', 'i-sm')}</button></div></div>`;
+  const drawWhen = () => mount($('[data-when]', el), html`${WHEN.map(([k, l]) => html`<button class="chip" type="button" data-w="${k}" aria-pressed="${mem.when === k}">${l} <span class="muted xs">${whenCounts[k]}</span></button>`)}`);
   function draw() {
-    drawTabs(); const box = $('[data-list]', el);
-    if (!items.length) { mount(box, html`<div class="card">${emptyState({ art: 'receipt', title: mem.status === 'completed' ? 'Nothing completed yet' : 'All clear', text: mem.status === 'completed' ? 'Tick a task and it appears here.' : 'No pending tasks. Add one above to get started.' })}</div>`); return; }
+    drawTabs(); drawWhen(); const box = $('[data-list]', el);
+    if (!items.length) { mount(box, html`<div class="card">${emptyState({ art: 'receipt', title: mem.when !== 'all' ? 'Nothing here' : mem.status === 'completed' ? 'Nothing completed yet' : 'All clear', text: mem.when !== 'all' ? EMPTY_WHEN[mem.when] : mem.status === 'completed' ? 'Tick a task and it appears here.' : 'No pending tasks. Add one above to get started.' })}</div>`); return; }
     let groups;
     if (mem.status === 'pending') groups = [['Overdue', items.filter((t) => t.overdue)], ['Today', items.filter((t) => t.dueToday)], ['Upcoming', items.filter((t) => t.dueDate && t.dueDate > today)], ['No date', items.filter((t) => !t.dueDate)]].filter(([, g]) => g.length);
     else groups = [[null, items]];
@@ -50,13 +53,15 @@ export default async function todo(el, { refresh }) {
   }
   async function load(reset = true) {
     const my = ++seq;
-    try { const page = reset ? 1 : pag.page + 1; const r = await api.get('/todos', { status: mem.status, page, limit: 50 }); if (my !== seq) return; items = reset ? r.items : items.concat(r.items); pag = r.pagination; counts = r.counts; today = r.today; items.forEach((t) => byId.set(t.id, t)); } catch (e) { toast(e.message, { type: 'error' }); }
+    try { const page = reset ? 1 : pag.page + 1; const r = await api.get('/todos', { status: mem.status, when: mem.when, page, limit: 50 }); if (my !== seq) return; items = reset ? r.items : items.concat(r.items); pag = r.pagination; counts = r.counts; whenCounts = r.whenCounts; today = r.today; items.forEach((t) => byId.set(t.id, t)); } catch (e) { toast(e.message, { type: 'error' }); }
     if (my === seq) draw();
   }
   const off = [
-    delegate(el, 'submit', '[data-quick]', async (e, f) => { e.preventDefault(); const t = f.elements.title.value.trim(); if (!t) return; try { await api.post('/todos', { title: t }); f.reset(); mem.status = mem.status === 'completed' ? 'pending' : mem.status; load(); } catch (er) { toast(er.message, { type: 'error' }); } }),
+    delegate(el, 'submit', '[data-quick]', async (e, f) => { e.preventDefault(); const t = f.elements.title.value.trim(); if (!t) return; const body = { title: t }; if (mem.when === 'today') body.dueDate = today; else if (mem.when === 'tomorrow') body.dueDate = addDays(today, 1); else if (mem.when === 'old') mem.when = 'all'; /* a filter must never hide the task you just added */
+      try { await api.post('/todos', body); f.reset(); mem.status = mem.status === 'completed' ? 'pending' : mem.status; load(); } catch (er) { toast(er.message, { type: 'error' }); } }),
     delegate(el, 'click', '[data-new]', () => openTodoForm({ onSaved: () => load() })),
     delegate(el, 'click', '[data-s]', (e, b) => { mem.status = b.dataset.s; load(); }),
+    delegate(el, 'click', '[data-w]', (e, b) => { mem.when = b.dataset.w; load(); }),
     delegate(el, 'click', '[data-check]', async (e, b) => {
       const t = byId.get(b.dataset.check); const next = !t.completed; b.setAttribute('aria-pressed', next); b.closest('.todo').classList.toggle('done', next);
       try { await api.put(`/todos/${t.id}/complete`, { completed: next }); setTimeout(() => load(), mem.status === 'all' ? 0 : 380); } catch (er) { toast(er.message, { type: 'error' }); load(); }

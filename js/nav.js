@@ -10,6 +10,8 @@ export const ROUTES = {
   trading: { title: 'Trading', icon: 'trending-up', main: true, group: 'business', sub: 'Crypto & investments', load: () => import('../pages/trading.js') },
   notes: { title: 'Notes', icon: 'notebook-pen', main: true, group: 'productivity', sub: 'Your notes', load: () => import('../pages/notes.js') },
   todo: { title: 'To-Do', icon: 'list-todo', main: true, group: 'productivity', sub: 'Daily tasks', load: () => import('../pages/todo.js') },
+  challenges: { title: 'Challenges', icon: 'target', main: true, group: 'productivity', sub: 'Daily goals & scores', load: () => import('../pages/challenges.js') },
+  timetable: { title: 'Timetable', icon: 'calendar-clock', main: true, group: 'productivity', sub: 'Your weekly routine', load: () => import('../pages/timetable.js') },
   settings: { title: 'Settings', icon: 'settings', load: () => import('../pages/settings.js'), highlight: 'settings' },
   more: { title: 'More', icon: 'ellipsis', tab: 'More', load: () => import('../pages/more.js') },
 };

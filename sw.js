@@ -1,5 +1,5 @@
 /* Minimal app-shell cache so Grow More opens fast and can be installed. API calls and config are never cached. */
-const CACHE = 'grow-more-shell-v4';
+const CACHE = 'grow-more-shell-v5';
 self.addEventListener('install', (e) => { self.skipWaiting(); e.waitUntil(caches.open(CACHE)); });
 self.addEventListener('activate', (e) => { e.waitUntil(caches.keys().then((ks) => Promise.all(ks.filter((k) => k !== CACHE).map((k) => caches.delete(k)))).then(() => self.clients.claim())); });
 self.addEventListener('fetch', (e) => {

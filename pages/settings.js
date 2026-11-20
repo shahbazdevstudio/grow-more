@@ -1,6 +1,6 @@
 import { $, html, icon, mount, delegate, raw } from '../js/core/dom.js';
 import { api } from '../js/core/api.js';
-import { state, reloadAccounts, reloadCategories } from '../js/core/state.js';
+import { state, reloadAccounts, reloadCategories, setBootstrap } from '../js/core/state.js';
 import { money, mmss } from '../js/core/format.js';
 import { applyTheme, currentTheme } from '../js/core/theme.js';
 import { setIdleMinutes } from '../js/core/session.js';
@@ -40,6 +40,31 @@ export function openChangePin() {
         if (e.code === 'LOCKED') { m.close(); toast('Too many incorrect attempts. The app is locked for a while.', { type: 'error' }); window.dispatchEvent(new Event('gm:session-ended')); return ctl.done(); }
         if (e.code === 'BAD_PIN') { cur = ''; next = ''; setStep(0); return ctl.error(`Your current PIN was incorrect (${e.data.attemptsLeft} attempt${e.data.attemptsLeft === 1 ? '' : 's'} left).`); }
         setStep(0); cur = ''; next = ''; return ctl.error(e.message);
+      }
+    },
+  });
+}
+
+/** Factory reset: confirmation, then the PIN. Everything is wiped on the server except the PIN and preferences. */
+export async function openResetData() {
+  const ok = await confirmDialog({ title: 'Reset everything to zero?', confirmText: 'Continue',
+    message: 'All your accounts, transactions, budgets, savings, Coding, Daraz, Trading, notes, to-dos, challenges and timetable will be permanently deleted and cannot be restored. Only your PIN and your preferences (theme, currency, time zone) stay. Consider downloading a backup first.' });
+  if (!ok) return;
+  let pad = null;
+  const m = openModal({ title: 'Enter your PIN to reset', size: 'narrow', mobile: 'sheet', onClose: () => pad && pad.destroy(), labelledBy: 'reset-title',
+    body: html`<div class="lock-card" style="margin:0 auto"><p class="lock-title" style="font-size:18px;color:var(--neg)">This deletes all your data</p><div data-pad></div></div>` });
+  pad = mountPinPad($('[data-pad]', m.el), {
+    onComplete: async (pin, ctl) => {
+      try {
+        await api.post('/me/reset', { pin, confirm: 'RESET' });
+        ctl.done(); m.close();
+        setBootstrap(await api.get('/bootstrap')); // accounts, categories and budget are empty / default again
+        toast('Everything was reset. Your PIN is unchanged.');
+        if (location.hash === '#/dashboard') window.dispatchEvent(new HashChangeEvent('hashchange')); else location.hash = '#/dashboard';
+      } catch (e) {
+        if (e.code === 'LOCKED') { m.close(); toast('Too many incorrect attempts. The app is locked for a while.', { type: 'error' }); window.dispatchEvent(new Event('gm:session-ended')); return ctl.done(); }
+        if (e.code === 'BAD_PIN') return ctl.error(`Incorrect PIN. Nothing was deleted (${e.data.attemptsLeft} attempt${e.data.attemptsLeft === 1 ? '' : 's'} left).`);
+        ctl.error(e.message);
       }
     },
   });
@@ -86,6 +111,10 @@ export default async function settings(el, { refresh }) {
       ${row('file-spreadsheet', 'Transactions (CSV)', 'Opens in Excel / Google Sheets', html`<button class="btn btn-sm" type="button" data-export="csv">${icon('download', 'i-sm')} Download</button>`)}
       <p class="hint" style="margin-top:8px">Backups never contain your PIN. Keep them somewhere private.</p></div>
 
+    <div class="card danger-zone"><div class="card-head"><h3 class="card-title">Reset</h3></div>
+      ${row('trash-2', 'Reset all data', 'Sets every module back to zero. Only your PIN and preferences stay.', html`<button class="btn btn-sm btn-danger" type="button" data-reset>Reset</button>`)}
+      <p class="hint" style="margin-top:8px">Needs your PIN. This cannot be undone, so download a backup above first if you may need the data.</p></div>
+
     <div class="card"><div class="card-head"><h3 class="card-title">About Grow More</h3></div>
       ${row('info', 'Version', `Phase ${info.phase} release`, html`<span class="pill gold">v${info.version}</span>`)}
       ${row('layout-dashboard', 'Available now', info.modules.available.join(' · '), '')}
@@ -99,6 +128,7 @@ export default async function settings(el, { refresh }) {
     delegate(el, 'change', '[data-cur]', (e, s2) => guard(async () => { await saveSetting({ currency: s2.value }); toast('Currency updated'); refresh(); })),
     delegate(el, 'change', '[data-tz]', (e, s2) => guard(async () => { await saveSetting({ timezone: s2.value }); toast('Time zone updated'); })),
     delegate(el, 'click', '[data-pin]', openChangePin),
+    delegate(el, 'click', '[data-reset]', openResetData),
     delegate(el, 'click', '[data-locknow]', () => window.dispatchEvent(new Event('gm:lock-now'))),
     delegate(el, 'click', '[data-revoke]', async () => { if (await confirmDialog({ title: 'Sign out other devices?', message: 'Any other phone or computer signed in to Grow More will need the PIN again. This device stays signed in.', confirmText: 'Sign out', danger: false })) guard(async () => { await api.post('/me/sessions/revoke'); toast('Other devices signed out'); }); }),
     delegate(el, 'click', '[data-budget]', () => openBudgetForm({ onSaved: refresh })),
